@@ -1,10 +1,21 @@
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
-context.fillStyle = "black";
 
 window.onload = function(){
+	context.translate(canvas.width/2,canvas.height/2);
+	context.fillStyle = "black";
+	context.beginPath();
+	context.moveTo(0,-300);
+	context.lineTo(0,300);
+	context.stroke();
+	context.moveTo(300,0);
+	context.lineTo(-300,0);
+	context.stroke();
+	context.closePath();
+	context.fillStyle = "red";
 	document.getElementById('drawLine').setAttribute('onclick', 'getCoordinates()');
 	document.getElementById('generateLines').setAttribute('onclick', 'generateLines()');
+	document.getElementById('generateBasicTriangles').setAttribute('onclick', 'generateBasicTriangles()');
 }
 
 function getCoordinates(){
@@ -12,66 +23,61 @@ function getCoordinates(){
 	var x1 = parseInt(document.getElementById('xValue1').value, 10);
 	var y0 = parseInt(document.getElementById('yValue0').value, 10);
 	var y1 = parseInt(document.getElementById('yValue1').value, 10);
-	drawLine(x0,x1,y0,y1);
+	drawLine(x0,y0,x1,y1);
 }
 
 function generateLines(){
 	var iterations = parseInt(document.getElementById('iterations').value, 10);
-	console.log(iterations);
 	for(var i = 0; i < iterations; i++){
-		var x0 = Math.floor(Math.random() * 400);
-		var y0 = Math.floor(Math.random() * 400);
-		var x1 = Math.floor(Math.random() * 400);
-		var y1 = Math.floor(Math.random() * 400);
-		console.log("(" + x0 + "," + y0 + ")(" + x1 + "," + y1 + ")");
-		drawLine(x0,x1,y0,y1);
+		var x0 = Math.floor(Math.random() * (300 - -300) + -300);
+		var y0 = Math.floor(Math.random() * (300 - -300) + -300);
+		var x1 = Math.floor(Math.random() * (300 - -300) + -300);
+		var y1 = Math.floor(Math.random() * (300 - -300) + -300);
+		drawLine(x0,y0,x1,y1);
+		//console.log("Line " + i + ": (" + x0 + "," + y0 + ") to (" + x1 + "," + y1 + ")");
 	}
 }
 
-function drawLine(x0,x1,y0,y1){
-	context.beginPath();
+function drawLine(x0,y0,x1,y1){
 	var deltaX = x1 - x0;
 	var deltaY = y1 - y0;
-	var m = deltaY / deltaX;
-	console.log(m);
-	var m2 = deltaX / deltaY;
-	var looper;
-	var change;
-	if(Math.abs(deltaY) > Math.abs(deltaX)){
-		looper = Math.abs(deltaY);
-		if(deltaY < 0){
-			change = -1;
-		} else if(deltaY > 0){
-			change  = 1;
-		} else {
-			change = 0;
-		}
-		for(var i = 0; i <= looper - 1; i++){
-			var X = (m2 * i) + x0;
-			var Y = y0 + (change * i);
-			Y = Math.trunc(Y);
-			context.fillRect(X,Y,1,1);
-			console.log("Delta Y: " + X + "," + Y);
-		}
+	var loop;
+	if(Math.abs(deltaX) > Math.abs(deltaY)){
+		loop = Math.abs(deltaX);
 	} else {
-		looper = Math.abs(deltaX);
-		if(deltaX < 0){
-			change = -1;
-		} else if(deltaX > 0){
-			change = 1;
-		} else {
-			change = 0;
-		}
-		if(deltaY < 0){
-			m = m * -1;
-		}
-		for(var i = 0; i <= looper - 1; i++){
-			var X = x0 + (change * i);
-			var Y = (m * i) + y0;
-			Y = Math.trunc(Y);
-			context.fillRect(X,Y,1,1);
-			console.log("Delta X: " + X + "," + Y);
-		}
+		loop = Math.abs(deltaY);
 	}
-	context.closePath();
+	var xChange = deltaX / loop;
+	var yChange = deltaY / loop;
+	for(var i = 0; i < loop; i++){
+		X = x0 + (xChange * i);
+		Y = y0 + (yChange * i);
+		context.beginPath();
+		context.fillRect(X,Y,1,1);
+		context.closePath();
+	}
+}
+
+function generateBasicTriangles(){
+	var t0 = performance.now();
+	var iterations = parseInt(document.getElementById('iterationsTriangle').value, 10);
+	for(var i = 0; i < iterations; i++){
+		var x0 = Math.floor(Math.random() * (300 - -300) + -300);
+		var y0 = Math.floor(Math.random() * (300 - -300) + -300);
+		var x1 = Math.floor(Math.random() * (300 - -300) + -300);
+		var y1 = Math.floor(Math.random() * (300 - -300) + -300);
+		var x2 = Math.floor(Math.random() * (300 - -300) + -300);
+		var y2 = Math.floor(Math.random() * (300 - -300) + -300);
+		drawBasicTriangle(x0,y0,x1,y1,x2,y2);
+		//console.log("("+x0+","+y0+")"+"("+x1+","+y1+")"+"("+x2+","+y2+")")
+	}
+	var t1 = performance.now();
+	console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
+}
+
+function drawBasicTriangle(x0,y0,x1,y1,x2,y2){
+	context.fillStyle = '#'+Math.floor(Math.random()*16777215).toString(16);
+	drawLine(x0,y0,x1,y1);
+	drawLine(x1,y1,x2,y2);
+	drawLine(x0,y0,x2,y2);
 }
